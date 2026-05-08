@@ -34,9 +34,7 @@ switch ($method) {
         send_error("Method not allowed", 405);
 }
 
-// ===================================================
 // GET CART
-// ===================================================
 function handleGetCart() {
     $pdo = getPDO();
 
@@ -57,7 +55,6 @@ function handleGetCart() {
                 p.price
             FROM cart c
             JOIN products p ON c.product_id = p.product_id
-            JOIN product_sizes ps ON p.product_id = ps.product_id
             WHERE c.customer_id = :customer_id
             GROUP BY c.cart_id, c.product_id, c.quantity, p.product_name
         ";
@@ -94,9 +91,8 @@ function handleGetCart() {
     }
 }
 
-// ===================================================
 // ADD TO CART
-// ===================================================
+
 function handleAddToCart() {
     $pdo = getPDO();
 
@@ -157,9 +153,7 @@ function handleAddToCart() {
     }
 }
 
-// ===================================================
 // UPDATE CART ITEM
-// ===================================================
 function handleUpdateCart() {
     $pdo = getPDO();
 
@@ -204,9 +198,7 @@ function handleUpdateCart() {
     }
 }
 
-// ===================================================
 // DELETE CART ITEM
-// ===================================================
 function handleDeleteCart() {
     $pdo = getPDO();
 
