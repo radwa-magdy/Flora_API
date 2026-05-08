@@ -28,9 +28,7 @@ $pdo = getPDO();
 
 try {
 
-    // =====================================================
-    // 1. GET CART 
-    // =====================================================
+    // GET CART 
     $stmt = $pdo->prepare("
         SELECT 
             c.quantity,
@@ -45,10 +43,9 @@ try {
 
 $stmt->execute(['cid' => $customerId]);
 $cartItems = $stmt->fetchAll();
-    // =====================================================
-    // 2. CALCULATE TOTALS
-    // =====================================================
-    $subtotal = 0;
+
+    // CALCULATE TOTALS
+   
     $orderItems = [];
 
     foreach ($cartItems as $item) {
@@ -67,27 +64,26 @@ $cartItems = $stmt->fetchAll();
     $tax = round($subtotal * 0.14, 2); 
     $total = round($subtotal + $shippingFee + $tax, 2);
 
-    // =====================================================
-    // 3. TRANSACTION
-    // =====================================================
+    
+    // TRANSACTION
     $pdo->beginTransaction();
 
-    // =====================================================
-    // 4. INSERT ORDER
-    // =====================================================
+
+    // INSERT ORDER
+  
     $stmt = $pdo->prepare("
         INSERT INTO orders 
         (customer_id, order_date, shipped_date, status)
-        VALUES (:cid, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'order placed')
+        VALUES (:cid, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'Delivered')
     ");
 
     $stmt->execute(['cid' => $customerId]);
     $orderId = $pdo->lastInsertId();
 
 
-    // =====================================================
-    // 5. INSERT ORDER ITEMS 
-    // =====================================================
+
+    // INSERT ORDER ITEMS 
+
     $stmt = $pdo->prepare("
         INSERT INTO order_items 
         (order_id, product_id, quantity, discount, price)
@@ -103,9 +99,9 @@ $cartItems = $stmt->fetchAll();
         ]);
     }
 
-    // =====================================================
-    // 6. SHIPPING 
-    // =====================================================
+   
+    // SHIPPING 
+
     $stmt = $pdo->prepare("
         INSERT INTO shipping_details
         (order_id, first_name, last_name, street_address, city, state, ZIP, shipping_method)
@@ -123,9 +119,9 @@ $cartItems = $stmt->fetchAll();
         'method' => $shipping['shipping_method'] ?? 'Standard Local Delivery'
     ]);
 
-    // =====================================================
-    // 7. PAYMENT 
-    // =====================================================
+  
+    // PAYMENT 
+
     if (!preg_match('/^\d{1,2}\/\d{2}$/', $payment['expiration_date'])) {
         throw new Exception("Use MM/YY format");
     }
@@ -150,17 +146,13 @@ $cartItems = $stmt->fetchAll();
         'cvv'  => $payment['cvv']
     ]);
 
-    // =====================================================
-    // 8. CLEAR CART
-    // =====================================================
+    // CLEAR CART
     $pdo->prepare("DELETE FROM cart WHERE customer_id = :cid")
         ->execute(['cid' => $customerId]);
 
     $pdo->commit();
 
-    // =====================================================
-    // 9. RESPONSE 
-    // =====================================================
+    // RESPONSE 
     send_json([
         "success" => true,
         "order_id" => (int)$orderId,
