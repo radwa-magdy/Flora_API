@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
+
     $pdo = getPDO();
 
     // Filters
@@ -26,12 +27,10 @@ try {
             p.image_url,
             p.description,
             c.category_name,
-            p.price 
+            p.price
         FROM products p
-        INNER JOIN categories c 
+        INNER JOIN categories c
             ON p.category_id = c.category_id
-        LEFT JOIN product_sizes ps 
-            ON p.product_id = ps.product_id
         WHERE 1=1
     ";
 
@@ -53,7 +52,6 @@ try {
     }
 
     $sql .= "
-        GROUP BY p.product_id
         ORDER BY p.product_name
     ";
 
@@ -62,10 +60,10 @@ try {
 
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Format response (flat)
     $result = [];
 
     foreach ($products as $p) {
+
         $result[] = [
             'product_id'    => (int)$p['product_id'],
             'product_name'  => $p['product_name'],
@@ -83,8 +81,10 @@ try {
     ]);
 
 } catch (PDOException $e) {
-    error_log($e->getMessage());
-    send_error('Database error', 500);
+
+    die($e->getMessage());
+
 } catch (Exception $e) {
+
     send_error('Server error', 500);
 }
