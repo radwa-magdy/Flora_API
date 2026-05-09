@@ -6,7 +6,7 @@
 //  Each function does one specific job (fetch orders, update status, etc.)
 // =========================================================
 
-require_once '../config/db.php';
+
 
 
 // =========================================================
