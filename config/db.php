@@ -10,20 +10,18 @@ define('DB_USER', getenv('MYSQLUSER'));
 define('DB_PASSWORD', getenv('MYSQLPASSWORD'));
 define('DB_PORT', getenv('MYSQLPORT') ?: 3306);
 
-try {
+// --- Create MySQLi connection ---
+$conn = mysqli_connect(
+    DB_HOST,
+    DB_USER,
+    DB_PASSWORD,
+    DB_NAME,
+    DB_PORT
+);
 
-    // --- Create PDO connection ---
-    $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+// --- Check connection ---
+if (!$conn) {
 
-    $conn = new PDO($dsn, DB_USER, DB_PASSWORD);
-
-    // --- PDO settings ---
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-
-    // --- Return JSON error ---
     header('Content-Type: application/json');
     http_response_code(500);
 
@@ -31,4 +29,7 @@ try {
         'error' => 'Database connection failed'
     ]));
 }
+
+// --- Set charset ---
+mysqli_set_charset($conn, 'utf8mb4');
 ?>
