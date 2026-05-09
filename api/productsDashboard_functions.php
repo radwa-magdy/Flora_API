@@ -316,12 +316,12 @@ function delete_product($conn, $product_id) {
         ];
     }
 
-    // --- First, get the image_url so we can delete the file after ---
+    // 1. Check product exists + get image
     $check = mysqli_prepare($conn, "SELECT image_url FROM products WHERE product_id = ?");
     mysqli_stmt_bind_param($check, "i", $product_id);
     mysqli_stmt_execute($check);
-    $check_result = mysqli_stmt_get_result($check);
-    $product = mysqli_fetch_assoc($check_result);
+    $result = mysqli_stmt_get_result($check);
+    $product = mysqli_fetch_assoc($result);
     mysqli_stmt_close($check);
 
     if (!$product) {
@@ -333,7 +333,13 @@ function delete_product($conn, $product_id) {
 
     $old_image = $product["image_url"];
 
-    // --- Now delete the product row ---
+    // 2. DELETE FROM inventory FIRST (important fix)
+    $inv = mysqli_prepare($conn, "DELETE FROM inventory WHERE product_id = ?");
+    mysqli_stmt_bind_param($inv, "i", $product_id);
+    mysqli_stmt_execute($inv);
+    mysqli_stmt_close($inv);
+
+    // 3. Now delete product
     $stmt = mysqli_prepare($conn, "DELETE FROM products WHERE product_id = ?");
     mysqli_stmt_bind_param($stmt, "i", $product_id);
     $executed = mysqli_stmt_execute($stmt);
@@ -347,7 +353,7 @@ function delete_product($conn, $product_id) {
 
     mysqli_stmt_close($stmt);
 
-    // --- Delete the image file from the server if it exists ---
+    // 4. delete image file
     if ($old_image && file_exists($old_image)) {
         unlink($old_image);
     }
@@ -358,7 +364,6 @@ function delete_product($conn, $product_id) {
         "product_id" => $product_id
     ];
 }
-
 
 // =========================================================
 //  FUNCTION: handle_image_upload($file)
