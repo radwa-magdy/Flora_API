@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 }
 
 require_once "productsDashboard_functions.php";
-
+require_once '../config/db.php';
 
 // =========================================================
 // PARSE ROUTE
