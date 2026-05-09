@@ -82,23 +82,41 @@ $cartItems = $stmt->fetchAll();
 
 
 
-    // INSERT ORDER ITEMS 
+    // INSERT ORDER ITEMS
 
     $stmt = $pdo->prepare("
-        INSERT INTO order_items 
-        (order_id, product_id, quantity, discount, price)
-        VALUES (:oid, :pid, :qty, 0, :price)
-    ");
+     INSERT INTO order_items
+        (
+        order_id,
+        product_id,
+        quantity,
+        discount,
+        price,
+        total_price
+    )
+    VALUES
+    (
+        :oid,
+        :pid,
+        :qty,
+        0,
+        :price,
+        :total_price
+    )
+");
 
-    foreach ($cartItems as $item) {
-        $stmt->execute([
-            'oid' => $orderId,
-            'pid' => $item['product_id'],
-            'qty' => $item['quantity'],
-            'price' => $item['price']
-        ]);
-    }
+foreach ($cartItems as $item) {
 
+    $totalPrice = $item['quantity'] * $item['price'];
+
+    $stmt->execute([
+        'oid'         => $orderId,
+        'pid'         => $item['product_id'],
+        'qty'         => $item['quantity'],
+        'price'       => $item['price'],
+        'total_price' => $totalPrice
+    ]);
+}
    
     // SHIPPING 
 
