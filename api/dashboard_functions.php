@@ -29,12 +29,21 @@ SELECT
     o.order_date,
     o.status,
     CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
-    COALESCE(SUM(COALESCE(oi.quantity,0) * COALESCE(oi.price,0)), 0) AS order_total
+
+    COALESCE(SUM(oi.quantity * oi.price), 0) AS order_total
+
 FROM orders o
 LEFT JOIN customers c ON o.customer_id = c.customer_id
 LEFT JOIN order_items oi ON o.order_id = oi.order_id
-GROUP BY o.order_id, o.order_date, o.status, c.first_name, c.last_name
-ORDER BY o.order_date DESC, o.order_id DESC
+
+GROUP BY
+    o.order_id,
+    o.order_date,
+    o.status,
+    c.first_name,
+    c.last_name
+
+ORDER BY o.order_id DESC
 ";
 
     // Run the query
