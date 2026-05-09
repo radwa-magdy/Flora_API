@@ -15,6 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     exit();
 }
 
+require_once '../config/db.php';
 require_once "dashboard_functions.php";
 
 
