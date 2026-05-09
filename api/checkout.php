@@ -46,6 +46,7 @@ $cartItems = $stmt->fetchAll();
 
     // CALCULATE TOTALS
    
+    $subtotal = 0;
     $orderItems = [];
 
     foreach ($cartItems as $item) {
@@ -61,8 +62,8 @@ $cartItems = $stmt->fetchAll();
     }
 
     $shippingFee = 30; 
-    $tax = round($subtotal * 0.14, 2); 
-    $total = round($subtotal + $shippingFee + $tax, 2);
+    // $tax = round($subtotal * 0.14, 2); 
+    $total = round($subtotal + $shippingFee /*+ $tax*/, 2);
 
     
     // TRANSACTION
@@ -178,7 +179,7 @@ foreach ($cartItems as $item) {
         "summary" => [
             "subtotal" => $subtotal,
             "shipping" => $shippingFee,
-            "tax" => $tax,
+            // "tax" => $tax,
             "total" => $total
         ]
     ], 201);
