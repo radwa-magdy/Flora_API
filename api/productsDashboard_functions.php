@@ -117,6 +117,30 @@ function add_product($conn, $data) {
     }
 
     $new_id = mysqli_insert_id($conn);
+    // =========================================================
+// INSERT INTO INVENTORY TABLE
+// =========================================================
+
+$unit = !empty($data["unit"])
+    ? trim($data["unit"])
+    : "piece";
+
+$inventory_stmt = mysqli_prepare(
+    $conn,
+    "INSERT INTO inventory (product_id, quantity, unit)
+     VALUES (?, ?, ?)"
+);
+
+mysqli_stmt_bind_param(
+    $inventory_stmt,
+    "iis",
+    $new_id,
+    $stock,
+    $unit
+);
+
+mysqli_stmt_execute($inventory_stmt);
+mysqli_stmt_close($inventory_stmt);
     mysqli_stmt_close($stmt);
 
     return [
@@ -230,6 +254,68 @@ function edit_product($conn, $product_id, $data) {
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
+    // =========================================================
+// UPDATE INVENTORY TABLE
+// =========================================================
+
+if (isset($data["stock"])) {
+
+    $unit = !empty($data["unit"])
+        ? trim($data["unit"])
+        : "piece";
+
+    // Check if inventory row exists
+    $check_stmt = mysqli_prepare(
+        $conn,
+        "SELECT inventory_id FROM inventory WHERE product_id = ?"
+    );
+
+    mysqli_stmt_bind_param($check_stmt, "i", $product_id);
+    mysqli_stmt_execute($check_stmt);
+
+    $result = mysqli_stmt_get_result($check_stmt);
+
+    if (mysqli_num_rows($result) > 0) {
+
+        // UPDATE inventory
+        $inventory_stmt = mysqli_prepare(
+            $conn,
+            "UPDATE inventory
+             SET quantity = ?, unit = ?
+             WHERE product_id = ?"
+        );
+
+        mysqli_stmt_bind_param(
+            $inventory_stmt,
+            "isi",
+            $stock,
+            $unit,
+            $product_id
+        );
+
+    } else {
+
+        // INSERT inventory if missing
+        $inventory_stmt = mysqli_prepare(
+            $conn,
+            "INSERT INTO inventory (product_id, quantity, unit)
+             VALUES (?, ?, ?)"
+        );
+
+        mysqli_stmt_bind_param(
+            $inventory_stmt,
+            "iis",
+            $product_id,
+            $stock,
+            $unit
+        );
+    }
+
+    mysqli_stmt_execute($inventory_stmt);
+
+    mysqli_stmt_close($inventory_stmt);
+    mysqli_stmt_close($check_stmt);
+}
     return [
         "success"    => true,
         "message"    => "Product updated successfully",
