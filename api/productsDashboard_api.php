@@ -11,14 +11,14 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 }
 
 require_once "productsDashboard_functions.php";
-require_once '../config/db.php';
+require_once "../config/db.php";
+
 
 // =========================================================
 // PARSE ROUTE
 // =========================================================
 $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 $parts = explode("/", trim($uri, "/"));
-
 $route = end($parts);
 
 
@@ -37,8 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
         echo json_encode([
             "success" => true,
-            "count" => count($products),
-            "data" => $products
+            "count"   => count($products),
+            "data"    => $products
         ]);
 
         exit();
@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
         echo json_encode([
             "success" => true,
-            "data" => get_categories($conn)
+            "data"    => get_categories($conn)
         ]);
 
         exit();
@@ -72,13 +72,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // -----------------------------------------------------
     if ($route === "add") {
 
-        $image_url = null;
+        $data = $_POST;
 
-        if (!empty($_FILES["product_image"])) {
-            $image_url = handle_image_upload($_FILES["product_image"]);
+        // Support JSON input
+        if (empty($data)) {
+            $json = file_get_contents("php://input");
+            $data = json_decode($json, true);
         }
 
-        $result = add_product($conn, $_POST, $image_url);
+        if (!$data) {
+            $data = [];
+        }
+
+        $result = add_product($conn, $data);
 
         if (!$result["success"]) {
             http_response_code(400);
@@ -95,9 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // -----------------------------------------------------
     if ($route === "edit") {
 
-        $product_id = isset($_GET["id"])
-            ? (int) $_GET["id"]
-            : 0;
+        $product_id = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
 
         if ($product_id <= 0) {
 
@@ -111,31 +115,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit();
         }
 
-        $image_url = null;
+        $data = $_POST;
 
-        if (!empty($_FILES["product_image"])) {
-            $image_url = handle_image_upload($_FILES["product_image"]);
-        }
-
-       $data = $_POST;
-
-        // If JSON body was sent
+        // Support JSON input
         if (empty($data)) {
-
-        $json = file_get_contents("php://input");
-        $data = json_decode($json, true);
+            $json = file_get_contents("php://input");
+            $data = json_decode($json, true);
+        }
 
         if (!$data) {
-        $data = [];
+            $data = [];
         }
-}
 
-$result = edit_product(
-    $conn,
-    $product_id,
-    $data,
-    $image_url
-);
+        $result = edit_product($conn, $product_id, $data);
+
         if (!$result["success"]) {
             http_response_code(400);
         }
@@ -157,9 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] === "DELETE") {
     // -----------------------------------------------------
     if ($route === "delete") {
 
-        $product_id = isset($_GET["id"])
-            ? (int) $_GET["id"]
-            : 0;
+        $product_id = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
 
         $result = delete_product($conn, $product_id);
 
