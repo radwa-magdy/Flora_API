@@ -123,7 +123,7 @@ function add_product($conn, $data) {
 
 $unit = !empty($data["unit"])
     ? trim($data["unit"])
-    : "piece";
+    : "pcs";
 
 $inventory_stmt = mysqli_prepare(
     $conn,
@@ -262,7 +262,7 @@ if (isset($data["stock"])) {
 
     $unit = !empty($data["unit"])
         ? trim($data["unit"])
-        : "piece";
+        : "pcs";
 
     // Check if inventory row exists
     $check_stmt = mysqli_prepare(
