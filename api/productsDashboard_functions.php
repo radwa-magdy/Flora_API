@@ -391,9 +391,18 @@ function delete_product($conn, $product_id) {
     mysqli_stmt_close($stmt);
 
     // 4. delete image file
-    if ($old_image && file_exists($old_image)) {
-        unlink($old_image);
+    // 4. delete image file
+if (!empty($old_image)) {
+
+    $base_url = "http://localhost/flowers-api/";
+
+    // Convert URL to local server path
+    $old_path = str_replace($base_url, "", $old_image);
+
+    if (file_exists($old_path)) {
+        unlink($old_path);
     }
+}
 
     return [
         "success" => true,
