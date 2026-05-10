@@ -2,8 +2,6 @@
 
 // =========================================================
 //  productsDashboard_functions.php — Products Dashboard Functions
-//  Contains all functions for product CRUD operations.
-//  Used by productsDashboard_api.php
 // =========================================================
 
 
