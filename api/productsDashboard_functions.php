@@ -141,9 +141,10 @@ function add_product($conn, $data, $image_url) {
     mysqli_stmt_close($stmt);
 
     return [
-        "success"    => true,
-        "message"    => "Product added successfully.",
-        "product_id" => $new_id
+    "success"    => true,
+    "message"    => "Product added successfully.",
+    "product_id" => $new_id,
+    "image_url"  => $image_url
     ];
 }
 
@@ -249,12 +250,47 @@ function edit_product($conn, $product_id, $data, $image_url = null) {
         $values[] = trim($data["description"]);
     }
 
-    // image
-    if ($image_url !== null) {
-        $fields[] = "image_url = ?";
-        $types .= "s";
-        $values[] = $image_url;
+// -----------------------------------------------------
+// Delete old image if new image uploaded
+// -----------------------------------------------------
+if ($image_url !== null) {
+
+    // Get old image URL
+    $check = mysqli_prepare(
+        $conn,
+        "SELECT image_url FROM products WHERE product_id = ?"
+    );
+
+    mysqli_stmt_bind_param($check, "i", $product_id);
+    mysqli_stmt_execute($check);
+
+    $result = mysqli_stmt_get_result($check);
+    $product = mysqli_fetch_assoc($result);
+
+    mysqli_stmt_close($check);
+
+    // Delete old image file
+    if (!empty($product["image_url"])) {
+
+        $base_url = "http://localhost/flowers-api/";
+
+        // Convert URL to local path
+        $old_path = str_replace(
+            $base_url,
+            "",
+            $product["image_url"]
+        );
+
+        if (file_exists($old_path)) {
+            unlink($old_path);
+        }
     }
+
+    // Save new image URL
+    $fields[] = "image_url = ?";
+    $types .= "s";
+    $values[] = $image_url;
+}
 
     // Nothing to update
     if (empty($fields)) {
@@ -295,9 +331,10 @@ function edit_product($conn, $product_id, $data, $image_url = null) {
     mysqli_stmt_close($stmt);
 
     return [
-        "success" => true,
-        "message" => "Product updated successfully.",
-        "product_id" => $product_id
+    "success"    => true,
+    "message"    => "Product updated successfully.",
+    "product_id" => $product_id,
+    "image_url"  => $image_url
     ];
 }
 // =========================================================
@@ -373,39 +410,79 @@ function delete_product($conn, $product_id) {
 // =========================================================
 function handle_image_upload($file) {
 
-    // If no file was sent or upload had an error, return null
-    if (!isset($file) || $file["error"] !== UPLOAD_ERR_OK) {
+    // -----------------------------------------------------
+    // Check upload
+    // -----------------------------------------------------
+    if (
+        !isset($file) ||
+        $file["error"] !== UPLOAD_ERR_OK
+    ) {
         return null;
     }
 
-    // --- Allowed image types ---
-    $allowed_types = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!in_array($file["type"], $allowed_types)) {
-        return null; // Reject non-image files
+    // -----------------------------------------------------
+    // Allowed image types
+    // -----------------------------------------------------
+    $allowed_types = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp"
+    ];
+
+    // Secure MIME validation
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = finfo_file($finfo, $file["tmp_name"]);
+    finfo_close($finfo);
+
+    if (!in_array($mime, $allowed_types)) {
+        return null;
     }
 
-    // --- Max file size: 5MB ---
+    // -----------------------------------------------------
+    // Max size = 5MB
+    // -----------------------------------------------------
     if ($file["size"] > 5 * 1024 * 1024) {
         return null;
     }
 
-    // --- Create the uploads folder if it doesn't exist ---
+    // -----------------------------------------------------
+    // Upload directory
+    // -----------------------------------------------------
     $upload_dir = "uploads/products/";
+
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0755, true);
     }
 
-    // --- Generate a unique file name to avoid overwriting existing files ---
+    // -----------------------------------------------------
+    // Generate unique file name
+    // -----------------------------------------------------
     $extension = pathinfo($file["name"], PATHINFO_EXTENSION);
-    $new_filename = "product_" . time() . "_" . uniqid() . "." . $extension;
-    $destination  = $upload_dir . $new_filename;
 
-    // --- Move the file from the temp location to our uploads folder ---
-    if (move_uploaded_file($file["tmp_name"], $destination)) {
-        return $destination; // Return the path to save in the database
+    $new_filename =
+        "product_" .
+        time() .
+        "_" .
+        uniqid() .
+        "." .
+        $extension;
+
+    $destination = $upload_dir . $new_filename;
+
+    // -----------------------------------------------------
+    // Move uploaded file
+    // -----------------------------------------------------
+    if (!move_uploaded_file($file["tmp_name"], $destination)) {
+        return null;
     }
 
-    return null; // Upload failed
+    // -----------------------------------------------------
+    // Return FULL image URL
+    // -----------------------------------------------------
+    $base_url = "http://localhost/flowers-api/";
+
+    return $base_url . $destination;
 }
 
 
