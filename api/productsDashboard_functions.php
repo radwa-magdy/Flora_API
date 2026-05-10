@@ -336,12 +336,19 @@ function delete_product($conn, $product_id) {
         return ["success" => false, "message" => "Invalid ID"];
     }
 
-    mysqli_query($conn, "DELETE FROM inventory WHERE product_id = $product_id");
+    // delete inventory first
+    $inv_stmt = mysqli_prepare(
+        $conn,
+        "DELETE FROM inventory WHERE product_id = ?"
+    );
+    mysqli_stmt_bind_param($inv_stmt, "i", $product_id);
+    mysqli_stmt_execute($inv_stmt);
+    mysqli_stmt_close($inv_stmt);
 
+    // delete product
     $stmt = mysqli_prepare($conn, "DELETE FROM products WHERE product_id = ?");
     mysqli_stmt_bind_param($stmt, "i", $product_id);
     mysqli_stmt_execute($stmt);
-
     mysqli_stmt_close($stmt);
 
     return [
