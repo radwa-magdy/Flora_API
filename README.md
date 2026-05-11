@@ -49,7 +49,7 @@ The project focuses on:
 
 ---
 
-## 🏗 Architecture Overview
+## Architecture Overview
 
 The project uses a simple modular structure:
 
@@ -62,7 +62,7 @@ The API is built with pure PHP to demonstrate core backend concepts and framewor
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```bash
 Flora_API/
