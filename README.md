@@ -1,5 +1,5 @@
 # Flora API
-> A lightweight RESTful API for a flora e-commerce platform, built with pure PHP 8.2 and MySQL.
+> A RESTful e-commerce API for selling flowers, built with pure PHP 8.2 and MySQL.
 
 Flora API is a backend project focused on clean API architecture, database integration, containerized deployment, and framework-free PHP development.
 
