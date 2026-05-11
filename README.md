@@ -20,7 +20,7 @@ Flora API is a backend project focused on clean API architecture, database integ
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer            | Technology         |
 | ---------------- | ------------------ |
@@ -191,7 +191,7 @@ DELETE /api/productsDashboard_api.php/delete?id=5
 
 ---
 
-# 📊 Overview Dashboard
+# Overview Dashboard
 
 ### Get Dashboard Data
 
@@ -217,7 +217,7 @@ PUT /api/dashboard_api.php?order_id=5
 
 ---
 
-# 🛒 Cart
+# Cart
 
 ### Get Cart
 
