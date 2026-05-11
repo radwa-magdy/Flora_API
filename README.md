@@ -67,6 +67,8 @@ The API is built with pure PHP to demonstrate core backend concepts and framewor
 ```bash
 Flora_API/
 ├── api/                              # API endpoint files
+│   ├── login.php
+│   ├── signup.php
 │   ├── products.php
 │   ├── cart.php
 │   ├── checkout.php
