@@ -77,7 +77,7 @@ Flora_API/
 │   ├── productsDashboard_api.php
 │   └── productsDashboard_functions.php
 ├── config/                           # Database configuration
-│    ├── db.php
+│   ├── db.php
 │   └── db-db.php
 │
 ├── .htaccess                         # URL routing & security rules
