@@ -74,8 +74,8 @@ $cartItems = $stmt->fetchAll();
   
     $stmt = $pdo->prepare("
         INSERT INTO orders 
-        (customer_id, order_date, shipped_date, status)
-        VALUES (:cid, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'Delivered')
+        (customer_id, order_date, shipped_date)
+        VALUES (:cid, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 DAY))
     ");
 
     $stmt->execute(['cid' => $customerId]);
